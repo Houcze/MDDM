@@ -1,13 +1,20 @@
 from tkinter import Checkbutton, ttk
 import tkinter
 from init import *
+import init
 from click.decorators import command
 import os
+import asyncio
+import w
+
+import tkinter.messagebox
 
 root = tkinter.Tk()
 root.title('CAS DESKTOP')
 root.geometry('400x800')
 root.iconbitmap(".\\nuist.ico")
+
+MonStr = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec')
 """
 两种格式的命令
 python select id --id xx"
@@ -26,6 +33,14 @@ var_1 = tkinter.IntVar()
 var_2 = tkinter.IntVar()
 var_3 = tkinter.IntVar()
 vari1 = tkinter.IntVar()
+
+m = []
+for mon_ in range(12):
+    m.append(tkinter.IntVar())
+m_id = []
+for mon_ in range(12):
+    m_id.append(tkinter.IntVar())
+
 def update_variables():
     if var1.get() == 1:
         var.append('TMP_ALL_STATION')
@@ -34,7 +49,21 @@ def update_variables():
         var.remove('TMP_ALL_STATION')
         domain.append('SURFACe')
 
+def update_month():
+    """这个函数是月份的响应函数
+    """
+    for i in range(12):
+        if m[i].get() == 1:
+            if str(i + 1) not in monthseq:
+                monthseq.append(str(i + 1).zfill(2))
+        #else:
+        #    if str(i + 1) in monthseq:
+        #        monthseq = [m_ for m_ in monthseq if m_ != str(i + 1).zfill(2)]
+    update_month_year()    
+    
+
 def update_time():
+    """V1版本的年月集合模式，V2版本我仿照ECMWF，将他们区分开来
     if var_1.get() == 1:
         time['202004'] = []
     else:
@@ -50,10 +79,40 @@ def update_time():
     else:
         if '202007' in time.keys():
             time.pop('202007')
+    """ 
+    if var_1.get() == 1:
+        init.yearseq.append('2020')
+    else:
+        if '2020' in init.yearseq:
+            init.yearseq = [y_ for y_ in init.yearseq if y_ != '2020']
+    update_month_year()
+
+
+def update_month_year():
+    if len(monthseq) != 0 and len(yearseq) != 0:
+        for y_ in yearseq:
+            for m_ in monthseq:
+                if (y_ + m_) not in time.keys():
+                    time[y_ + m_] = []
+    else:
+        """不满足更新年份月份的条件，啥都不干
+        """
+        pass
+            
 
 ######################### Select by area ####################################
 def cas_area():
-    os.system('pack\python.exe find.py area --llat {} --llon {} --ulat {} --ulon {} --dype txt'.format(llat.get(), llon.get(), ulat.get(), ulon.get()))
+    async def gui2cli():
+        os.system('pack\python.exe find.py area --llat {} --llon {} --ulat {} --ulon {} --filetype txt'.format(llat.get(), llon.get(), ulat.get(), ulon.get()))
+    asyncio.run(gui2cli())
+    for file in os.listdir(w.path):
+        with open(w.path + file) as f:
+            f.seek(0, os.SEEK_END)
+            size = f.tell()
+            if size == 0:
+                tkinter.messagebox.showinfo(title='Attention', message='Some of the data you requested is not in our database, you\'ll get an empty file')
+                break
+               
 
 p = ttk.PanedWindow(f_area, width=340)
 """Select Variables"""
@@ -72,15 +131,15 @@ surface.pack(side='left')
 """Select Year & Month"""
 """这个地方需要维护一个巨大的日历系统..."""
 """为了增加稳定性, 我这个地方写死它"""
-f2 = ttk.Labelframe(f_area, text='Year & Month')
+f2 = ttk.Labelframe(f_area, text='Year')
 
-year_month_1 = ttk.Checkbutton(f2, text='202004', width=25, variable=var_1, command=update_time)
-year_month_2 = ttk.Checkbutton(f2, text='202006', width=25, variable=var_2, command=update_time)
-year_month_3 = ttk.Checkbutton(f2, text='202007', width=25, variable=var_3, command=update_time)
+year_month_1 = ttk.Checkbutton(f2, text='2020', width=25, variable=var_1, command=update_time)
+#year_month_2 = ttk.Checkbutton(f2, text='202006', width=25, variable=var_2, command=update_time)
+#year_month_3 = ttk.Checkbutton(f2, text='202007', width=25, variable=var_3, command=update_time)
 
 year_month_1.grid(row=0, column=1)
-year_month_2.grid(row=0, column=2)
-year_month_3.grid(row=1, column=1)
+#year_month_2.grid(row=0, column=2)
+#year_month_3.grid(row=1, column=1)
 
 """Select Time"""
 """设计逻辑上实在是有很多问题..."""
@@ -90,7 +149,22 @@ year_month_3.grid(row=1, column=1)
    这个问题我还没有想到一个比较合理的解决方案，但是为了应付项目交差我决定先撂担子。
    毕竟这个难题在cli命令行程序中完全不是事。
    我认为这种需要超多参数指定的任务真的很难在GUI中为之设计一个合理的逻辑...
+   V2 版本：我仿照了ERA5的映射模式
 """
+
+f9 = ttk.Labelframe(f_area, text='Month')
+month = []
+for mon_ in range(12):
+    month.append(ttk.Checkbutton(f9, text=MonStr[mon_], width=25, variable=m[mon_], command=update_month))
+
+
+mon_ = 0
+for ro in range(6):
+    for col in range(1, 2 + 1):
+        month[mon_].grid(row=ro, column=col)
+        mon_ += 1
+del mon_
+
 
 """Set Geo Limit"""
 f4 = ttk.LabelFrame(f_area, text='Geographical area')
@@ -127,9 +201,12 @@ sc.grid(row=0, column=1)
 configure = ttk.Button(f6, text='Download Data', command=cas_area)
 configure.grid(row=0, column=2)
 
+
+
 p.add(f3)
 p.add(f1)
 p.add(f2)
+p.add(f9)
 p.add(f4)
 p.add(f6)
 p.pack()
@@ -144,6 +221,7 @@ def update_variables_id():
         var.remove('TMP_ALL_STATION')
         domain.append('SURFACe')
 
+"""
 def update_time_id():
     if var_1_id.get() == 1:
         time['202004'] = []
@@ -160,6 +238,57 @@ def update_time_id():
     else:
         if '202007' in time.keys():
             time.pop('202007')
+"""
+
+def update_month_id():
+    """这个函数是月份的响应函数
+    """
+    for i in range(12):
+        if m_id[i].get() == 1:
+            if str(i + 1) not in monthseq:
+                monthseq.append(str(i + 1).zfill(2))
+        #else:
+        #    if str(i + 1) in monthseq:
+        #        monthseq = [m_ for m_ in monthseq if m_ != str(i + 1).zfill(2)]
+    update_month_year()    
+    
+
+def update_time_id():
+    """V1版本的年月集合模式，V2版本我仿照ECMWF，将他们区分开来
+    if var_1.get() == 1:
+        time['202004'] = []
+    else:
+        if '202004' in time.keys():
+            time.pop('202004')
+    if var_2.get() == 1:
+        time['202006'] = []
+    else:
+        if '202006' in time.keys():
+            time.pop('202006')
+    if var_3.get() == 1:
+        time['202007'] = []
+    else:
+        if '202007' in time.keys():
+            time.pop('202007')
+    """ 
+    if var_1_id.get() == 1:
+        init.yearseq.append('2020')
+    else:
+        if '2020' in init.yearseq:
+            init.yearseq = [y_ for y_ in init.yearseq if y_ != '2020']
+    update_month_year()
+
+
+def update_month_year_id():
+    if len(monthseq) != 0 and len(yearseq) != 0:
+        for y_ in yearseq:
+            for m_ in monthseq:
+                if (y_ + m_) not in time.keys():
+                    time[y_ + m_] = []
+    else:
+        """不满足更新年份月份的条件，啥都不干
+        """
+        pass
 
 var1_id = tkinter.IntVar()
 var_1_id = tkinter.IntVar()
@@ -176,7 +305,7 @@ demo_id.pack(side='left')
 
 """Select domain"""
 f3_id = ttk.Labelframe(f_id, text='Product Type')
-surface_id = ttk.Checkbutton(f3_id, text='SURFACe', width=25, variable=vari1)
+surface_id = ttk.Checkbutton(f3_id, text='SURFACe', width=25, variable=vari1_id)
 #upper_air = ttk.Checkbutton(f3, text='UPPER AIR', width=25)
 surface_id.pack(side='left')
 #upper_air.pack(side='right')
@@ -184,15 +313,30 @@ surface_id.pack(side='left')
 """Select Year & Month"""
 """这个地方需要维护一个巨大的日历系统..."""
 """同上，为了增加稳定性, 这个地方写死它"""
-f2_id = ttk.Labelframe(f_id, text='Year & Month')
+f2_id = ttk.Labelframe(f_id, text='Year')
 
-year_month_1_id = ttk.Checkbutton(f2_id, text='202004', width=25, variable=var_1_id, command=update_time_id)
-year_month_2_id = ttk.Checkbutton(f2_id, text='202006', width=25, variable=var_2_id, command=update_time_id)
-year_month_3_id = ttk.Checkbutton(f2_id, text='202007', width=25, variable=var_3_id, command=update_time_id)
+year_month_1_id = ttk.Checkbutton(f2_id, text='2020', width=25, variable=var_1_id, command=update_time_id)
+#year_month_2_id = ttk.Checkbutton(f2_id, text='202006', width=25, variable=var_2_id, command=update_time_id)
+#year_month_3_id = ttk.Checkbutton(f2_id, text='202007', width=25, variable=var_3_id, command=update_time_id)
 
 year_month_1_id.grid(row=0, column=1)
-year_month_2_id.grid(row=0, column=2)
-year_month_3_id.grid(row=1, column=1)
+#year_month_2_id.grid(row=0, column=2)
+#year_month_3_id.grid(row=1, column=1)
+
+
+f9_id = ttk.Labelframe(f_id, text='Month')
+month_id = []
+for mon_ in range(12):
+    month_id.append(ttk.Checkbutton(f9_id, text=MonStr[mon_], width=25, variable=m_id[mon_], command=update_month_id))
+
+
+mon_ = 0
+for ro in range(6):
+    for col in range(1, 2 + 1):
+        month_id[mon_].grid(row=ro, column=col)
+        mon_ += 1
+del mon_
+
 
 f4_id = ttk.Labelframe(f_id, text='station id')
 id = ttk.Entry(f4_id, show=None, width=16, text='id')
@@ -202,8 +346,8 @@ def submitid():
     with open('config.py', 'w') as file:
         file.write(templatea + templateb.format(domain, var, time) + templatec)
 
-def cas_id():
-    os.system('pack\python.exe find.py station --id {}'.format(id.get()))
+async def cas_id():
+    os.system('pack\python.exe find.py station --id {} --filetype txt'.format(id.get()))
 
 f6_id = ttk.LabelFrame(f_id)
 sc_id = ttk.Button(f6_id, text='Configure', command=submitid)
@@ -215,6 +359,7 @@ configure_id.grid(row=0, column=2)
 pid.add(f3_id)
 pid.add(f1_id)
 pid.add(f2_id)
+pid.add(f9_id)
 pid.add(f4_id)
 pid.add(f6_id)
 pid.pack()

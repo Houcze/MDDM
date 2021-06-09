@@ -1,7 +1,12 @@
 import click
 import json
+import w
 from config import *
+import os
 
+##### Check if user set avaiable
+if not os.path.exists(w.path):
+    os.mkdir(w.path)
 
 @click.group()
 def find():
@@ -10,7 +15,8 @@ def find():
 
 @find.command()
 @click.option('--id', default=None, help='station id')
-def station(id):
+@click.option('--filetype', default=None, help='file format to save as (In this version json and txt is supported)')
+def station(id, filetype):
     """python find id --id xx"""
     if id:
         for t1 in time.keys():
@@ -27,8 +33,14 @@ def station(id):
                             item.pop('_id')
                             print(item)
                             this_collection.append(item)
-                        with open('.\\nuist\\{}_{}_{}_{}_{}.json'.format(t1[:4], dom, v, t2, id), 'w', encoding='utf-8') as file:
-                            json.dump(this_collection, file)
+                        if filetype == 'json':
+                            with open('{}/{}_{}_{}_{}_{}.json'.format(w.path, t1[:4], dom, v, t2, id), 'w', encoding='utf-8') as file:
+                                json.dump(this_collection, file)
+                        elif filetype == 'txt':
+                            with open('{}/{}_{}_{}_{}.txt'.format(w.path, t1[:4], dom, v, t2), 'w', encoding='utf-8') as file:
+                                for item in this_collection:
+                                    file.write(str(item)[1:-1].replace('\'', ''))
+                                    file.write('\n')                              
                               
 @find.command()
 @click.option('--llat', default=None, help='lower lat')
@@ -61,10 +73,10 @@ def area(llat, llon, ulat, ulon, filetype):
                             """此处获得的item是一个字典"""
                             this_collection.append(item)
                         if filetype == 'json':
-                            with open('.\\nuist\\{}_{}_{}_{}.json'.format(t1[:4], dom, v, t2), 'w', encoding='utf-8') as file:
+                            with open('{}/{}_{}_{}_{}.json'.format(w.path, t1[:4], dom, v, t2), 'w', encoding='utf-8') as file:
                                 json.dump(this_collection, file)
                         elif filetype == 'txt':
-                            with open('.\\nuist\\{}_{}_{}_{}.txt'.format(t1[:4], dom, v, t2), 'w', encoding='utf-8') as file:
+                            with open('{}/{}_{}_{}_{}.txt'.format(w.path, t1[:4], dom, v, t2), 'w', encoding='utf-8') as file:
                                 for item in this_collection:
                                     file.write(str(item)[1:-1].replace('\'', ''))
                                     file.write('\n')     

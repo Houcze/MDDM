@@ -1,6 +1,8 @@
 var = []
 domain = []
 time = {}
+monthseq = []
+yearseq = []
 
 templatea = """
 from pymongo import MongoClient\n

@@ -36,7 +36,7 @@ domain = ['SURFACe']
 
 variable = ['TMP_ALL_STATION']
 
-time = {'202007': []}
+time = {'202004': []}
 
 
 for ti in time.keys():
