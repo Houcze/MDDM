@@ -9,6 +9,7 @@ import asyncio
 import w
 import tkinter.messagebox
 import tkinter.filedialog
+import webbrowser
 
 
 root = tkinter.Tk()
@@ -27,9 +28,12 @@ n = ttk.Notebook(root)
 f_area = ttk.Frame(n, width=390, height=750)
 f_id = ttk.Frame(n, width=390, height=400)
 f_setting = ttk.Frame(n, width=390, height=200)
+f_about = ttk.Frame(n, width=390, height=200)
+
 n.add(f_area, text='Select by Area')
 n.add(f_id, text='Select by station id')
 n.add(f_setting, text='Settings')
+n.add(f_about, text='About')
 
 
 var1 = tkinter.IntVar()
@@ -116,6 +120,7 @@ def cas_area():
             if size == 0:
                 tkinter.messagebox.showinfo(title='Attention', message='Some of the data you requested is not in our database, you\'ll get an empty file')
                 break
+    tkinter.messagebox.showinfo(title='Attention', message='Done')
                
 
 p = ttk.PanedWindow(f_area, width=340)
@@ -350,8 +355,9 @@ def submitid():
     with open('config.py', 'w') as file:
         file.write(templatea + templateb.format(domain, var, time) + templatec)
 
-async def cas_id():
+def cas_id():
     os.system('pack\python.exe find.py station --id {} --filetype txt'.format(id.get()))
+    tkinter.messagebox.showinfo(title='Attention', message='Done!')
 
 f6_id = ttk.LabelFrame(f_id)
 sc_id = ttk.Button(f6_id, text='Configure', command=submitid)
@@ -415,7 +421,16 @@ btnPath = ttk.Button(psettings, text='Change', width=10, command=pathCallBack)
 btnPath.grid(row=1, column=1)
 
 psettings.pack()
+#######################################################################################
+pabout = ttk.PanedWindow(f_about, width=340)
 
+def open_readme():
+    url = '{}\docs\MICAPS4.pdf'.format(os.getcwd())
+    webbrowser.open(url, new=2)
+
+btnr = ttk.Button(pabout, text='Open data format introduction', width=30, command=open_readme)
+btnr.grid(row=1, column=1)
+pabout.pack()
 
 n.pack()
 root.mainloop()

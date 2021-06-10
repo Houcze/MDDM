@@ -6,7 +6,7 @@ yearseq = []
 
 templatea = """
 from pymongo import MongoClient\n
-client = MongoClient('127.0.0.1', 27017)\n
+client = MongoClient('172.16.52.24', 80)\n
 monthDays = {\n
     1:31,\n
     2:29,\n
