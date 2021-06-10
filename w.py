@@ -1,4 +1,1 @@
-"""请根据系统首先配置好路径，所有数据将会被下载到对应的路径下。
-"""
-
-path = './nuist/'
+path = 'C:/Users/Administrator/Desktop/cas/nuist/'

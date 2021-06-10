@@ -1,13 +1,15 @@
 from tkinter import Checkbutton, ttk
 import tkinter
+from typing import DefaultDict
 from init import *
 import init
 from click.decorators import command
 import os
 import asyncio
 import w
-
 import tkinter.messagebox
+import tkinter.filedialog
+
 
 root = tkinter.Tk()
 root.title('CAS DESKTOP')
@@ -24,8 +26,10 @@ n = ttk.Notebook(root)
 
 f_area = ttk.Frame(n, width=390, height=750)
 f_id = ttk.Frame(n, width=390, height=400)
+f_setting = ttk.Frame(n, width=390, height=200)
 n.add(f_area, text='Select by Area')
 n.add(f_id, text='Select by station id')
+n.add(f_setting, text='Settings')
 
 
 var1 = tkinter.IntVar()
@@ -356,6 +360,23 @@ sc_id.grid(row=0, column=1)
 configure_id = ttk.Button(f6_id, text='Download Data', command=cas_id)
 configure_id.grid(row=0, column=2)
 
+
+def cas_all_id():
+    async def gui2cli():
+        os.system('pack\python.exe find.py area --llat -90 --llon -180 --ulat 90 --ulon 180 --filetype txt')
+    asyncio.run(gui2cli())
+    for file in os.listdir(w.path):
+        with open(w.path + file) as f:
+            f.seek(0, os.SEEK_END)
+            size = f.tell()
+            if size == 0:
+                tkinter.messagebox.showinfo(title='Attention', message='Some of the data you requested is not in our database, you\'ll get an empty file')
+                break
+
+download_all_id = ttk.Button(f6_id, text='Download All Data', command=cas_all_id)
+download_all_id.grid(row=0, column=3)
+
+
 pid.add(f3_id)
 pid.add(f1_id)
 pid.add(f2_id)
@@ -363,6 +384,37 @@ pid.add(f9_id)
 pid.add(f4_id)
 pid.add(f6_id)
 pid.pack()
+
+########################################################################################
+"""Settings of all tabs
+"""
+def get_path():
+    with open('w.py', 'r') as w:
+        path = w.read()
+    path = path[(path.index('\'') + 1):(-1)]
+    return path
+
+StrPath = tkinter.StringVar(value='{}'.format(get_path()))
+
+psettings = ttk.PanedWindow(f_setting, width=340)
+def set_data_download_path():
+    pass
+
+def pathCallBack():
+    filePath = tkinter.filedialog.askdirectory(title='Set data path')
+    if filePath != '':
+        StrPath.set(filePath)
+        with open('w.py', 'w') as w:
+            w.write('path = \'{}\''.format(StrPath.get() + '/'))
+
+ttk.Label(psettings, text="Data Path:").grid(row=0, column=0)
+txtResult = tkinter.Entry(psettings, width=40, textvariable=StrPath)
+txtResult.grid(row=1, column=0)
+
+btnPath = ttk.Button(psettings, text='Change', width=10, command=pathCallBack)
+btnPath.grid(row=1, column=1)
+
+psettings.pack()
 
 
 n.pack()
