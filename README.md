@@ -1,5 +1,3 @@
-# cas
-为南京信息工程大学气象台编写的MICAPS4数据查询器
+# MICAPS DATA DOWNLOAD MANAGER
+为南京信息工程大学气象台编写的MICAPS4数据查询器, 由MONGODB提供
 
-## 需要
-* 64位，windows7及以上的操作系统
