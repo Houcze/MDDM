@@ -1,1 +1,0 @@
-path = 'C:/Users/Administrator/Desktop/cas/nuist/'
