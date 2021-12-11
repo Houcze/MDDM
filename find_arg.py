@@ -44,17 +44,13 @@ def open_readme():
     
 ########### 预处理，将所有的str展开 ############
 if args.year:
-    year = [y for y in args.year.split(',')]
-    year = [int(y) for y in year]
+    year = [int(y) for y in args.year.split(',')]
 if args.month:
-    month = [m for m in args.month.split(',')]
-    month = [int(m) for m in month]
+    month = [int(m) for m in args.month.split(',')]
 if args.day:
-    day = [d for d in args.day.split(',')]
-    day = [int(d) for d in day]
+    day = [int(d) for d in args.day.split(',')]
 if args.hour:
-    hour = [h for h in args.hour.split(',')]
-    hour = [int(h) for h in hour]
+    hour = [int(h) for h in args.hour.split(',')]
 if args.variable:
     variable = [v for v in args.variable.split(',')]
 
@@ -107,7 +103,7 @@ if args.mode == 'id':
                     if item['date'] in t_str:
                         this_collection.append(item)
                 print(this_collection)
-                with open('data/{}.txt'.format(i), 'w', encoding='utf-8') as file:
+                with open('{}/{}.txt'.format(args.output, i), 'w', encoding='utf-8') as file:
                     for record in this_collection:
                         for k in record:
                             if k in table.keys():
@@ -128,7 +124,7 @@ elif args.mode == 'area':
                 if item['date'] in t_str:
                     this_collection.append(item)
             print(this_collection)
-            with open('data/{}.txt'.format(args.area), 'w', encoding='utf-8') as file:
+            with open('{}/{}.txt'.format(args.output, args.area), 'w', encoding='utf-8') as file:
                 for record in this_collection:
                     for k in record:
                         if k in table.keys():
