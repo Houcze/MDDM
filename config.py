@@ -1,5 +1,5 @@
 
 from pymongo import MongoClient
 
-client = MongoClient('192.168.124.15', 27017)
+client = MongoClient('192.168.124.10', 27017)
 

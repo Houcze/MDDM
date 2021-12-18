@@ -21,6 +21,7 @@ parser.add_argument('--hour', type=str, help='当天的时辰')
 parser.add_argument('--variable', type=str, help='要检索的变量')
 parser.add_argument('--output', type=str, help='将数据下载到这个文件夹')
 args = parser.parse_args()
+print(args.output)
 
 
 def get_days(year, month):
@@ -103,7 +104,7 @@ if args.mode == 'id':
                     if item['date'] in t_str:
                         this_collection.append(item)
                 print(this_collection)
-                with open('{}/{}.txt'.format(args.output, i), 'w', encoding='utf-8') as file:
+                with open(r'{}\{}.txt'.format(args.output, i), 'w', encoding='utf-8') as file:
                     for record in this_collection:
                         for k in record:
                             if k in table.keys():
@@ -124,7 +125,8 @@ elif args.mode == 'area':
                 if item['date'] in t_str:
                     this_collection.append(item)
             print(this_collection)
-            with open('{}/{}.txt'.format(args.output, args.area), 'w', encoding='utf-8') as file:
+            print(args.output)
+            with open(r'{}\{}.{}.txt'.format(args.output, args.area, v), 'w', encoding='utf-8') as file:
                 for record in this_collection:
                     for k in record:
                         if k in table.keys():
